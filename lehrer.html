@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Oehm's "You and the others" · Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Barlow+Semi+Condensed:ital,wght@0,400;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0a123d; --panel:rgba(13,24,72,.72); --line:#26418f;
+    --gold:#e3b341; --goldlight:#f7e08b; --golddark:#8a6a1c;
+    --amber1:#ffc94d; --amber2:#e8820c; --green:#63c37a; --red:#ff6b5e;
+    --text:#eef1fb; --muted:#8fa0d0;
+    --clip:polygon(22px 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 22px 100%, 0 50%);
+    --goldgrad:linear-gradient(180deg,#f7e08b 0%,#d4a934 48%,#8a6a1c 100%);
+    --navygrad:linear-gradient(180deg,#1a2a72 0%,#0a123d 100%);
+    --bargrad:linear-gradient(180deg,#ffd970 0%,#e8a02c 55%,#9c6f12 100%);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:#02061a radial-gradient(ellipse 120% 80% at 50% 12%, #10298a 0%, #081352 42%, #02061a 100%) fixed;
+    color:var(--text); font-family:'Barlow Semi Condensed',system-ui,sans-serif; padding:20px 24px 60px;
+  }
+  .layout{max-width:900px; margin:0 auto;}
+  header{display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:20px;}
+  .logo .pre{font-style:italic; font-weight:500; color:var(--muted); font-size:.85rem; letter-spacing:.08em;}
+  .logo .main{
+    font-family:'Cinzel',serif; font-weight:800; font-size:1.45rem; letter-spacing:.1em; line-height:1.15;
+    background:var(--goldgrad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .phase{font-family:'IBM Plex Mono',monospace; font-size:.78rem; padding:5px 14px;
+    border-radius:999px; border:1px solid var(--gold); color:var(--gold); letter-spacing:.06em;}
+  header .spacer{flex:1;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:16px;
+    box-shadow:0 6px 24px rgba(0,0,0,.35);}
+  .label{font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; font-weight:600;}
+  .label .q{text-transform:none; letter-spacing:.02em; color:var(--text); font-weight:600; font-size:1rem;}
+  textarea{width:100%; min-height:64px; resize:vertical; background:rgba(2,6,26,.6); color:var(--text);
+    border:1px solid var(--line); border-radius:10px; padding:12px; font-family:inherit; font-size:1rem;}
+  textarea::placeholder{color:var(--muted);}
+  .btn{padding:12px 22px; border-radius:10px; border:none; font-family:inherit; font-size:.95rem;
+    font-weight:700; letter-spacing:.03em; cursor:pointer; background:var(--goldgrad); color:#221300;}
+  .btn.secondary{background:transparent; color:var(--text); border:1px solid var(--line);}
+  .btn.danger{background:transparent; color:var(--red); border:1px solid var(--red);}
+  .btn:disabled{opacity:.35; cursor:default;}
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  /* Player monitor */
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{display:flex; align-items:center; gap:7px; padding:7px 13px; border-radius:999px;
+    border:1px solid var(--line); font-size:.9rem; color:var(--muted); background:rgba(2,6,26,.35);}
+  .chip.done{border-color:var(--gold); color:var(--goldlight);}
+  .chip .dot{width:9px; height:9px; border-radius:50%; background:var(--line);}
+  .chip.done .dot{background:var(--gold); box-shadow:0 0 8px rgba(227,179,65,.7);}
+  .chip .x{cursor:pointer; opacity:.45; margin-left:2px;}
+  .chip .x:hover{opacity:1; color:var(--red);}
+  .progress{font-family:'IBM Plex Mono',monospace; font-size:1.7rem; font-weight:700; margin-bottom:14px; color:var(--goldlight);}
+  .progress small{font-size:.8rem; color:var(--muted); font-family:'Barlow Semi Condensed',sans-serif; font-weight:400; letter-spacing:.05em;}
+  /* Audience chart */
+  .chart{display:flex; align-items:flex-end; gap:34px; height:280px; padding:14px 24px 0; justify-content:center;}
+  .bar{width:120px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+  .bar .count{font-family:'IBM Plex Mono',monospace; font-size:2.1rem; font-weight:700; margin-bottom:8px; color:var(--goldlight);
+    text-shadow:0 0 14px rgba(227,179,65,.35);}
+  .bar .col{width:100%; border:1px solid rgba(247,224,139,.5); border-bottom:none; border-radius:6px 6px 0 0;
+    background:var(--bargrad); transition:height .9s cubic-bezier(.2,.8,.2,1); height:0;
+    box-shadow:0 0 22px rgba(232,160,44,.25) inset;}
+  .bar .letterbox{margin-top:12px; width:100%; position:relative;}
+  .bar .letterbox .shell{clip-path:var(--clip); background:var(--goldgrad); padding:2px; display:block;}
+  .bar .letterbox .in{clip-path:var(--clip); background:var(--navygrad); display:flex; align-items:center; justify-content:center;
+    padding:8px 0; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.25rem; color:var(--gold);}
+  .bar .avg{font-size:.78rem; color:var(--muted); margin-top:6px;}
+  @media (prefers-reduced-motion:reduce){ .bar .col{transition:none;} }
+  /* Tables */
+  table{width:100%; border-collapse:collapse; font-size:.92rem;}
+  th{text-align:left; font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+    padding:6px 8px; border-bottom:1px solid var(--line); font-weight:600;}
+  td{padding:8px; border-bottom:1px solid rgba(38,65,143,.5);}
+  td.num, th.num{text-align:right; font-family:'IBM Plex Mono',monospace;}
+  tr.top td{color:var(--goldlight); font-weight:700;}
+  .choicecell{font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--gold);}
+  .rank{font-family:'IBM Plex Mono',monospace; color:var(--muted); width:26px;}
+  .hidden{display:none !important;}
+  #setupHint{background:#3a2a12; border:1px solid var(--gold); border-radius:12px; padding:14px;
+    font-size:.9rem; line-height:1.5; margin-bottom:16px;}
+  code{font-family:'IBM Plex Mono',monospace; font-size:.85em; color:var(--gold);}
+
+  /* ===== Standings overlay ===== */
+  #standingsOverlay{position:fixed; inset:0; z-index:100; overflow-y:auto;
+    background:#02061a radial-gradient(ellipse 120% 80% at 50% 12%, #10298a 0%, #081352 42%, #02061a 100%);
+    display:flex; flex-direction:column; align-items:center; padding:44px 20px 60px;}
+  .ov-pre{font-style:italic; font-weight:500; color:var(--muted); font-size:1rem; letter-spacing:.08em;}
+  .ov-title{font-family:'Cinzel',serif; font-weight:800; font-size:2.3rem; letter-spacing:.14em; margin-bottom:6px;
+    background:var(--goldgrad); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 2px 18px rgba(227,179,65,.2);}
+  .ov-sub{font-size:.8rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:34px;}
+  #ovRows{width:100%; max-width:560px; display:flex; flex-direction:column; gap:12px; margin-bottom:36px;}
+  .ovrow{position:relative; opacity:0; transform:translateY(24px);
+    animation:ovIn .55s cubic-bezier(.2,.8,.2,1) forwards;}
+  .ovrow .shell{clip-path:var(--clip); background:var(--goldgrad); padding:2px; display:block;}
+  .ovrow .in{clip-path:var(--clip); background:var(--navygrad); display:flex; align-items:center; gap:16px;
+    padding:13px 40px; font-size:1.15rem;}
+  .ovrow .ovrank{font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--gold); width:34px;}
+  .ovrow .ovname{font-weight:600; flex:1;}
+  .ovrow .ovrounds{font-size:.78rem; color:var(--muted); margin-right:8px;}
+  .ovrow .ovpts{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.3rem; color:var(--goldlight);}
+  .ovrow.winner .in{background:var(--goldgrad); color:#221300;}
+  .ovrow.winner .ovrank, .ovrow.winner .ovpts{color:#221300;}
+  .ovrow.winner .ovrounds{color:#5c4a12;}
+  .ovrow.winner{transform:translateY(24px) scale(1.06);}
+  .ovrow.winner .in{padding:17px 40px; font-size:1.3rem;}
+  .ovrow.winner .ovname::after{content:" ★"; }
+  @keyframes ovIn{
+    to{opacity:1; transform:translateY(0) scale(var(--sc,1));}
+  }
+  .ovrow.winner{--sc:1.06;}
+  @media (prefers-reduced-motion:reduce){
+    .ovrow{animation:none; opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <header>
+    <div class="logo">
+      <div class="pre">Mr Oehm's</div>
+      <div class="main">YOU AND THE OTHERS</div>
+    </div>
+    <span class="phase" id="phaseTag">–</span>
+    <div class="spacer"></div>
+    <button class="btn" id="standingsBtn">Show standings</button>
+    <button class="btn danger" id="resetBtn">New game</button>
+  </header>
+
+  <div id="setupHint" class="hidden">
+    <b>Firebase is not configured.</b> Add your Firebase project settings under <code>firebaseConfig</code>
+    in the source code (Realtime Database, same as in the player app).
+  </div>
+
+  <!-- Round control -->
+  <div class="card" id="controlCard">
+    <div class="label">New round</div>
+    <textarea id="questionInput" placeholder='Question (optional – otherwise: "Question on the board")'></textarea>
+    <div class="btnrow">
+      <button class="btn" id="startBtn">Start round</button>
+    </div>
+  </div>
+
+  <!-- Live monitor -->
+  <div class="card hidden" id="monitorCard">
+    <div class="label">Locked in · Round <span id="monRound"></span></div>
+    <div class="progress"><span id="doneCount">0</span>/<span id="totalCount">0</span> <small>locked in</small></div>
+    <div class="chips" id="monitorChips"></div>
+    <div class="btnrow">
+      <button class="btn" id="closeBtn">Close &amp; reveal</button>
+      <button class="btn secondary" id="abortBtn">Cancel round</button>
+    </div>
+  </div>
+
+  <!-- 1. Votes -->
+  <div class="card hidden" id="revealCard">
+    <div class="label">The class voted · Round <span id="revRound"></span> <span class="q" id="revQuestion"></span></div>
+    <div class="chart">
+      <div class="bar"><div class="count" id="cntA">0</div><div class="col" id="colA"></div>
+        <div class="letterbox"><span class="shell"><span class="in">A</span></span></div><div class="avg" id="avgA"></div></div>
+      <div class="bar"><div class="count" id="cntB">0</div><div class="col" id="colB"></div>
+        <div class="letterbox"><span class="shell"><span class="in">B</span></span></div><div class="avg" id="avgB"></div></div>
+      <div class="bar"><div class="count" id="cntC">0</div><div class="col" id="colC"></div>
+        <div class="letterbox"><span class="shell"><span class="in">C</span></span></div><div class="avg" id="avgC"></div></div>
+    </div>
+  </div>
+
+  <!-- 2. Points this round -->
+  <div class="card hidden" id="detailCard">
+    <div class="label">Points this round · Round <span id="detRound"></span></div>
+    <table>
+      <thead><tr><th>Name</th><th>Pick</th><th class="num">Guess A</th><th class="num">Guess B</th><th class="num">Guess C</th><th class="num">Points</th></tr></thead>
+      <tbody id="detailBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 3. Overall standings -->
+  <div class="card" id="scoreCard">
+    <div class="label">Overall standings <span style="text-transform:none; letter-spacing:.02em;">(lower = better)</span></div>
+    <table>
+      <thead><tr><th></th><th>Name</th><th class="num">Rounds</th><th class="num">Points</th></tr></thead>
+      <tbody id="scoreBody"><tr><td colspan="4" style="color:var(--muted);">No scores yet.</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Players -->
+  <div class="card">
+    <div class="label">Players in the game (<span id="lobbyCount">0</span>)</div>
+    <div class="chips" id="lobbyChips"></div>
+  </div>
+</div>
+
+<!-- Animated standings overlay -->
+<div id="standingsOverlay" class="hidden">
+  <div class="ov-pre">Mr Oehm's</div>
+  <div class="ov-title">THE STANDINGS</div>
+  <div class="ov-sub">lower = better</div>
+  <div id="ovRows"></div>
+  <div style="display:flex; gap:12px;">
+    <button class="btn secondary" id="ovReplay">Replay</button>
+    <button class="btn" id="ovClose">Close</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// ================= FIREBASE CONFIGURATION =================
+const firebaseConfig = {
+  apiKey: "AIzaSyCXD2G8yqXrWFvvhyClKCIeEP0h584_IXA",
+  authDomain: "klassenorakel.firebaseapp.com",
+  databaseURL: "https://klassenorakel-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "klassenorakel",
+  storageBucket: "klassenorakel.firebasestorage.app",
+  messagingSenderId: "536810886331",
+  appId: "1:536810886331:web:03b790e0200ad226c3859e"
+};
+// ==========================================================
+const ROOT = "klassenorakel";
+
+const $ = id => document.getElementById(id);
+if (firebaseConfig.apiKey === "XXX") $("setupHint").classList.remove("hidden");
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let state = { phase: "lobby", round: 0, question: "" };
+let players = {};
+let answers = {};
+let scoresCache = {};
+let answersRef = null, answersCb = null;
+
+const PHASE_LABEL = { lobby: "Ready", open: "Voting open", revealed: "Revealed" };
+
+// ---------- Listeners ----------
+db.ref(`${ROOT}/state`).on("value", snap => {
+  state = snap.val() || { phase: "lobby", round: 0, question: "" };
+  attachAnswers();
+  render();
+});
+
+db.ref(`${ROOT}/players`).on("value", snap => {
+  players = snap.val() || {};
+  renderPlayers();
+});
+
+db.ref(`${ROOT}/scores`).on("value", snap => {
+  scoresCache = snap.val() || {};
+  renderScores(scoresCache);
+});
+
+function attachAnswers(){
+  if (answersRef) answersRef.off("value", answersCb);
+  answersRef = db.ref(`${ROOT}/answers/r${state.round}`);
+  answersCb = snap => { answers = snap.val() || {}; renderMonitor(); };
+  answersRef.on("value", answersCb);
+}
+
+// ---------- Rendering ----------
+function render(){
+  $("phaseTag").textContent = `${PHASE_LABEL[state.phase] || "–"} · Round ${state.round}`;
+  $("monitorCard").classList.toggle("hidden", state.phase !== "open");
+  $("controlCard").classList.toggle("hidden", state.phase === "open");
+  $("startBtn").textContent = state.round === 0 ? "Start round" : `Start round ${state.round + 1}`;
+  if (state.phase === "open") {
+    $("monRound").textContent = state.round;
+    renderMonitor();
+  }
+  if (state.phase === "revealed") {
+    showResults(state.round);
+  } else if (state.phase !== "open") {
+    $("revealCard").classList.add("hidden");
+    $("detailCard").classList.add("hidden");
+  }
+}
+
+function renderPlayers(){
+  const keys = Object.keys(players).sort((a,b) => players[a].name.localeCompare(players[b].name, "de"));
+  $("lobbyCount").textContent = keys.length;
+  $("lobbyChips").innerHTML = keys.map(k =>
+    `<span class="chip"><span>${esc(players[k].name)}</span><span class="x" data-k="${k}" title="remove">×</span></span>`
+  ).join("") || `<span style="color:var(--muted); font-size:.85rem;">Nobody has joined yet.</span>`;
+  document.querySelectorAll("#lobbyChips .x").forEach(x => {
+    x.onclick = () => {
+      const k = x.dataset.k;
+      if (confirm(`Remove ${players[k].name}? Their points will be deleted too.`)) {
+        db.ref(`${ROOT}/players/${k}`).remove();
+        db.ref(`${ROOT}/scores/${k}`).remove();
+      }
+    };
+  });
+  renderMonitor();
+}
+
+function renderMonitor(){
+  if (state.phase !== "open") return;
+  const keys = Object.keys(players).sort((a,b) => players[a].name.localeCompare(players[b].name, "de"));
+  let done = 0;
+  $("monitorChips").innerHTML = keys.map(k => {
+    const has = !!answers[k];
+    if (has) done++;
+    return `<span class="chip ${has ? "done" : ""}"><span class="dot"></span>${esc(players[k].name)}</span>`;
+  }).join("");
+  $("doneCount").textContent = done;
+  $("totalCount").textContent = keys.length;
+}
+
+function sortedScores(){
+  return Object.keys(scoresCache)
+    .map(k => ({ key: k, ...scoresCache[k] }))
+    .sort((a,b) => a.total - b.total || b.rounds - a.rounds);
+}
+
+function renderScores(){
+  const rows = sortedScores();
+  $("scoreBody").innerHTML = rows.length ? rows.map((r,i) =>
+    `<tr class="${i === 0 ? "top" : ""}"><td class="rank">${i+1}</td><td>${esc(r.name)}</td>
+     <td class="num">${r.rounds}</td><td class="num">${r.total}</td></tr>`
+  ).join("") : `<tr><td colspan="4" style="color:var(--muted);">No scores yet.</td></tr>`;
+}
+
+// ---------- Actions ----------
+$("startBtn").onclick = () => {
+  const q = $("questionInput").value.trim();
+  db.ref(`${ROOT}/state`).set({
+    phase: "open",
+    round: state.round + 1,
+    question: q
+  });
+  $("questionInput").value = "";
+};
+
+$("abortBtn").onclick = () => {
+  if (!confirm("Cancel this round? Answers already submitted in this round will be discarded.")) return;
+  db.ref(`${ROOT}/answers/r${state.round}`).remove();
+  db.ref(`${ROOT}/state`).update({ phase: "lobby", round: state.round - 1, question: "" });
+};
+
+$("closeBtn").onclick = async () => {
+  const total = Object.keys(players).length;
+  const done = Object.keys(answers).filter(k => players[k]).length;
+  if (done === 0) { alert("No answers have been submitted yet."); return; }
+  if (done < total && !confirm(`Only ${done} of ${total} have locked in. Reveal anyway?`)) return;
+  await evaluateRound();
+};
+
+async function evaluateRound(){
+  const round = state.round;
+  const snap = await db.ref(`${ROOT}/answers/r${round}`).once("value");
+  const ans = snap.val() || {};
+
+  const counts = { A: 0, B: 0, C: 0 };
+  Object.values(ans).forEach(a => { if (counts[a.choice] !== undefined) counts[a.choice]++; });
+
+  const perPlayer = {};
+  let sumA = 0, sumB = 0, sumC = 0, n = 0;
+  Object.keys(ans).forEach(k => {
+    const a = ans[k];
+    const dev = Math.abs(a.predA - counts.A) + Math.abs(a.predB - counts.B) + Math.abs(a.predC - counts.C);
+    perPlayer[k] = { name: a.name, choice: a.choice, predA: a.predA, predB: a.predB, predC: a.predC, dev };
+    sumA += a.predA; sumB += a.predB; sumC += a.predC; n++;
+  });
+
+  await db.ref(`${ROOT}/results/r${round}`).set({
+    counts,
+    avg: n ? { A: +(sumA/n).toFixed(1), B: +(sumB/n).toFixed(1), C: +(sumC/n).toFixed(1) } : null,
+    question: state.question || "",
+    perPlayer
+  });
+
+  // Accumulate scores
+  const scoreSnap = await db.ref(`${ROOT}/scores`).once("value");
+  const scores = scoreSnap.val() || {};
+  Object.keys(perPlayer).forEach(k => {
+    const prev = scores[k] || { total: 0, rounds: 0 };
+    scores[k] = { name: perPlayer[k].name, total: prev.total + perPlayer[k].dev, rounds: prev.rounds + 1 };
+  });
+  await db.ref(`${ROOT}/scores`).set(scores);
+
+  await db.ref(`${ROOT}/state`).update({ phase: "revealed" });
+}
+
+// ---------- Show results ----------
+function showResults(round){
+  db.ref(`${ROOT}/results/r${round}`).once("value").then(snap => {
+    const res = snap.val();
+    if (!res) return;
+    $("revRound").textContent = round;
+    $("detRound").textContent = round;
+    $("revQuestion").textContent = res.question ? " · " + res.question : "";
+    const max = Math.max(res.counts.A, res.counts.B, res.counts.C, 1);
+    ["A","B","C"].forEach(o => {
+      $("cnt"+o).textContent = res.counts[o];
+      $("avg"+o).textContent = res.avg ? `Ø guess: ${res.avg[o]}` : "";
+      requestAnimationFrame(() => {
+        setTimeout(() => { $("col"+o).style.height = (res.counts[o] / max * 190) + "px"; }, 60);
+      });
+    });
+    const rows = Object.values(res.perPlayer || {}).sort((a,b) => a.dev - b.dev);
+    $("detailBody").innerHTML = rows.map((r,i) =>
+      `<tr class="${i === 0 ? "top" : ""}"><td>${esc(r.name)}</td>
+       <td class="choicecell">${r.choice}</td>
+       <td class="num">${r.predA}</td><td class="num">${r.predB}</td><td class="num">${r.predC}</td>
+       <td class="num">${r.dev}</td></tr>`
+    ).join("");
+    $("revealCard").classList.remove("hidden");
+    $("detailCard").classList.remove("hidden");
+  });
+}
+
+// ---------- Animated standings overlay ----------
+function showStandings(){
+  const rows = sortedScores();
+  if (!rows.length) { alert("No scores yet."); return; }
+  // Reveal from last place up to the winner: the lower the rank, the later it appears.
+  const stagger = 0.7; // seconds between reveals
+  $("ovRows").innerHTML = rows.map((r, i) => {
+    const delay = ((rows.length - 1 - i) * stagger).toFixed(2);
+    return `<div class="ovrow ${i === 0 ? "winner" : ""}" style="animation-delay:${delay}s">
+      <span class="shell"><span class="in">
+        <span class="ovrank">${i + 1}</span>
+        <span class="ovname">${esc(r.name)}</span>
+        <span class="ovrounds">${r.rounds} rounds</span>
+        <span class="ovpts">${r.total}</span>
+      </span></span>
+    </div>`;
+  }).join("");
+  $("standingsOverlay").classList.remove("hidden");
+}
+
+$("standingsBtn").onclick = showStandings;
+$("ovReplay").onclick = showStandings;
+$("ovClose").onclick = () => $("standingsOverlay").classList.add("hidden");
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") $("standingsOverlay").classList.add("hidden");
+});
+
+// ---------- Reset ----------
+$("resetBtn").onclick = () => {
+  if (!confirm("Start a new game? All points, answers and players will be deleted.")) return;
+  db.ref(ROOT).set({ state: { phase: "lobby", round: 0, question: "" } });
+};
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+</script>
+</body>
+</html>
