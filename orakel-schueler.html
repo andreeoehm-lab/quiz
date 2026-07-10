@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mr Oehm's "You and the others" · Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Barlow+Semi+Condensed:ital,wght@0,400;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0a123d; --navy2:#16256b; --panel:rgba(13,24,72,.72); --line:#26418f;
+    --gold:#e3b341; --goldlight:#f7e08b; --golddark:#8a6a1c;
+    --amber1:#ffc94d; --amber2:#e8820c;
+    --text:#eef1fb; --muted:#8fa0d0;
+    --clip:polygon(22px 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 22px 100%, 0 50%);
+    --goldgrad:linear-gradient(180deg,#f7e08b 0%,#d4a934 48%,#8a6a1c 100%);
+    --navygrad:linear-gradient(180deg,#1a2a72 0%,#0a123d 100%);
+    --ambergrad:linear-gradient(180deg,#ffd970 0%,#ff9f1c 55%,#c96a00 100%);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; min-height:100%;}
+  body{
+    background:#02061a radial-gradient(ellipse 120% 80% at 50% 18%, #10298a 0%, #081352 42%, #02061a 100%) fixed;
+    color:var(--text); font-family:'Barlow Semi Condensed',system-ui,sans-serif;
+    display:flex; flex-direction:column; align-items:center; padding:18px 14px 46px;
+  }
+  .wrap{width:100%; max-width:480px;}
+  /* Logo */
+  .logo{text-align:center; margin:6px 0 20px;}
+  .logo .pre{font-style:italic; font-weight:500; color:var(--muted); font-size:.95rem; letter-spacing:.08em;}
+  .logo .main{
+    font-family:'Cinzel',serif; font-weight:800; font-size:1.5rem; letter-spacing:.1em; line-height:1.2;
+    background:var(--goldgrad); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 2px 12px rgba(227,179,65,.18);
+  }
+  #whoami{text-align:center; font-size:.8rem; color:var(--muted); margin:-12px 0 16px;}
+  #whoami a{color:var(--muted); text-decoration:underline; cursor:pointer;}
+  /* Cards */
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:14px;
+    backdrop-filter:blur(2px); box-shadow:0 6px 24px rgba(0,0,0,.35);}
+  .label{font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; font-weight:600;}
+  .roundtag{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--gold);
+    border:1px solid var(--gold); border-radius:999px; padding:2px 12px; margin-bottom:10px; letter-spacing:.1em;}
+  /* Lozenge */
+  .lozwrap{position:relative; margin:8px 0;}
+  .lozwrap::before{content:""; position:absolute; left:-14px; right:-14px; top:50%; height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--gold) 80%,transparent);}
+  .loz{position:relative; z-index:1; display:block; width:100%; border:none; padding:0; background:none;
+    font-family:inherit; cursor:pointer; color:var(--text);}
+  .loz .shell{clip-path:var(--clip); background:var(--goldgrad); padding:2px;}
+  .loz .in{clip-path:var(--clip); background:var(--navygrad); padding:15px 36px;
+    display:flex; align-items:center; justify-content:center; gap:10px; min-height:58px;}
+  .loz:active .in{filter:brightness(1.25);}
+  .loz.sel .in{background:var(--ambergrad); color:#221300;}
+  .loz.sel .letter{color:#221300;}
+  .loz .letter{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.5rem; color:var(--gold);}
+  .loz .cap{font-size:1.05rem; font-weight:600; letter-spacing:.04em;}
+  .question .in{font-size:1.15rem; font-weight:700; line-height:1.3; text-align:center; padding:16px 38px;}
+  /* Stepper */
+  .tiprow{display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px dashed var(--line);}
+  .tiprow:last-of-type{border-bottom:none;}
+  .tiprow .opt{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.3rem; color:var(--gold); width:26px;}
+  .stepper{display:flex; align-items:center; gap:8px; margin-left:auto;}
+  .stepper button{width:52px; height:52px; border-radius:10px; border:1px solid var(--line);
+    background:rgba(22,37,107,.6); color:var(--goldlight); font-size:1.6rem; font-family:inherit; cursor:pointer;}
+  .stepper button:active{background:var(--line);}
+  .stepper .val{font-family:'IBM Plex Mono',monospace; font-size:1.6rem; font-weight:700; width:56px; text-align:center;}
+  .sumline{display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-top:12px;}
+  .sumline b{font-family:'IBM Plex Mono',monospace; color:var(--text);}
+  input[type=text]{width:100%; padding:14px; font-size:1.1rem; font-family:inherit;
+    background:rgba(2,6,26,.6); border:1px solid var(--line); border-radius:10px; color:var(--text); margin-bottom:14px;}
+  input[type=text]::placeholder{color:var(--muted);}
+  /* Duplicate warning */
+  #dupBox{border:1px solid var(--amber2); background:rgba(255,159,28,.08); border-radius:10px; padding:14px; margin-bottom:14px;}
+  #dupBox p{margin:0 0 12px; font-size:.95rem; line-height:1.45;}
+  #dupBox b{color:var(--amber1);}
+  .btnrow{display:flex; gap:10px;}
+  .btn-small{flex:1; padding:12px; border-radius:10px; font-family:inherit; font-weight:700; font-size:.9rem; cursor:pointer;}
+  .btn-yes{background:var(--goldgrad); border:none; color:#221300;}
+  .btn-no{background:transparent; border:1px solid var(--line); color:var(--text);}
+  /* Waiting */
+  .waiting{text-align:center; padding:38px 20px;}
+  .waiting .pulse{width:14px; height:14px; border-radius:50%; background:var(--gold);
+    margin:0 auto 18px; animation:pulse 1.4s infinite; box-shadow:0 0 18px rgba(227,179,65,.6);}
+  @keyframes pulse{0%,100%{opacity:.35; transform:scale(.85);} 50%{opacity:1; transform:scale(1.15);}}
+  @media (prefers-reduced-motion:reduce){ .waiting .pulse{animation:none;} }
+  /* Result */
+  .resrow{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line);}
+  .resrow:last-of-type{border-bottom:none;}
+  .resrow .opt{font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--gold); width:24px; font-size:1.1rem;}
+  .resnums{margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:.92rem; text-align:right;}
+  .resnums .dev{color:var(--muted); display:block; font-size:.78rem;}
+  .scorebox{display:flex; gap:12px;}
+  .scorebox .box{flex:1; text-align:center; border:1px solid var(--line); border-radius:10px; padding:14px 6px;
+    background:rgba(2,6,26,.4);}
+  .scorebox .num{font-family:'IBM Plex Mono',monospace; font-size:2rem; font-weight:700; color:var(--gold);}
+  .scorebox .cap{font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:4px;}
+  .mychoice{font-size:.92rem; color:var(--muted); margin-top:12px; text-align:center;}
+  .mychoice b{color:var(--gold);}
+  .hidden{display:none !important;}
+  #setupHint{background:#3a2a12; border:1px solid var(--gold); border-radius:12px; padding:14px; font-size:.85rem; line-height:1.5;}
+  code{font-family:'IBM Plex Mono',monospace; font-size:.8em; color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="pre">Mr Oehm's</div>
+    <div class="main">YOU AND THE OTHERS</div>
+  </div>
+  <div id="whoami" class="hidden"><span id="myName"></span> · <a id="logout">leave</a></div>
+
+  <div id="setupHint" class="hidden">
+    <b>Firebase is not configured.</b><br>
+    Add your Firebase project settings under <code>firebaseConfig</code> in the source code
+    (same as in the teacher app).
+  </div>
+
+  <!-- Join -->
+  <div id="viewJoin" class="card hidden">
+    <div class="label">Join the game</div>
+    <div id="dupBox" class="hidden">
+      <p><b id="dupName"></b> is already logged in.<br>Is that you?</p>
+      <div class="btnrow">
+        <button class="btn-small btn-yes" id="dupYes">Yes, that's me</button>
+        <button class="btn-small btn-no" id="dupNo">No, I'll pick another name</button>
+      </div>
+    </div>
+    <input type="text" id="nameInput" placeholder="Please enter your first name" maxlength="20" autocomplete="off">
+    <button class="loz" id="joinBtn"><span class="shell"><span class="in"><span class="cap">Join the game</span></span></span></button>
+  </div>
+
+  <!-- Waiting -->
+  <div id="viewWait" class="card waiting hidden">
+    <div class="pulse"></div>
+    <div class="label" style="margin:0;">Waiting for the next round …</div>
+  </div>
+
+  <!-- Round open -->
+  <div id="viewVote" class="hidden">
+    <div class="card" style="text-align:center;">
+      <span class="roundtag" id="roundTag1"></span>
+      <div class="lozwrap question loz" style="cursor:default;">
+        <span class="shell"><span class="in" id="questionText"></span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">1 · Your answer</div>
+      <div class="lozwrap"><button class="loz choice" data-choice="A"><span class="shell"><span class="in"><span class="letter">A:</span><span class="cap">choose A</span></span></span></button></div>
+      <div class="lozwrap"><button class="loz choice" data-choice="B"><span class="shell"><span class="in"><span class="letter">B:</span><span class="cap">choose B</span></span></span></button></div>
+      <div class="lozwrap"><button class="loz choice" data-choice="C"><span class="shell"><span class="in"><span class="letter">C:</span><span class="cap">choose C</span></span></span></button></div>
+    </div>
+    <div class="card">
+      <div class="label">2 · Your prediction — how will the class vote?</div>
+      <div class="tiprow"><span class="opt">A</span>
+        <div class="stepper"><button data-t="A" data-d="-1">−</button><span class="val" id="tA">0</span><button data-t="A" data-d="1">+</button></div>
+      </div>
+      <div class="tiprow"><span class="opt">B</span>
+        <div class="stepper"><button data-t="B" data-d="-1">−</button><span class="val" id="tB">0</span><button data-t="B" data-d="1">+</button></div>
+      </div>
+      <div class="tiprow"><span class="opt">C</span>
+        <div class="stepper"><button data-t="C" data-d="-1">−</button><span class="val" id="tC">0</span><button data-t="C" data-d="1">+</button></div>
+      </div>
+      <div class="sumline"><span>Your predictions add up to: <b id="tipSum">0</b></span><span>Players in game: <b id="playerCount">–</b></span></div>
+    </div>
+    <div class="lozwrap"><button class="loz" id="submitBtn" disabled style="opacity:.4;"><span class="shell"><span class="in"><span class="cap">Final answer!</span></span></span></button></div>
+  </div>
+
+  <!-- Locked in -->
+  <div id="viewDone" class="card waiting hidden">
+    <div class="pulse"></div>
+    <div class="label" style="margin:0 0 6px;">Locked in!</div>
+    <div style="font-size:.85rem; color:var(--muted);">Waiting for the others …</div>
+  </div>
+
+  <!-- Result -->
+  <div id="viewResult" class="hidden">
+    <div class="card">
+      <span class="roundtag" id="roundTag2"></span>
+      <div class="label">The class voted</div>
+      <div id="resRows"></div>
+      <div class="mychoice" id="myChoiceLine"></div>
+    </div>
+    <div class="card">
+      <div class="scorebox">
+        <div class="box"><div class="num" id="roundDev">–</div><div class="cap">This round</div></div>
+        <div class="box"><div class="num" id="totalDev">–</div><div class="cap">Total · lower = better</div></div>
+      </div>
+    </div>
+    <div class="card waiting" style="padding:20px;">
+      <div class="label" style="margin:0;">Waiting for the next round …</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// ================= FIREBASE CONFIGURATION =================
+const firebaseConfig = {
+  apiKey: "AIzaSyCXD2G8yqXrWFvvhyClKCIeEP0h584_IXA",
+  authDomain: "klassenorakel.firebaseapp.com",
+  databaseURL: "https://klassenorakel-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "klassenorakel",
+  storageBucket: "klassenorakel.firebasestorage.app",
+  messagingSenderId: "536810886331",
+  appId: "1:536810886331:web:03b790e0200ad226c3859e"
+};
+// ==========================================================
+const ROOT = "klassenorakel";
+
+const $ = id => document.getElementById(id);
+const views = ["viewJoin","viewWait","viewVote","viewDone","viewResult"];
+function show(v){ views.forEach(x => $(x).classList.toggle("hidden", x !== v)); }
+
+if (firebaseConfig.apiKey === "XXX") $("setupHint").classList.remove("hidden");
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let myKey = null, myName = null;
+let state = { phase: "lobby", round: 0, question: "" };
+let myAnswerThisRound = null;
+let choice = null;
+let tips = { A: 0, B: 0, C: 0 };
+let pendingName = null;
+
+function sanitizeKey(name){
+  return name.trim().toLowerCase()
+    .replace(/[.#$\[\]\/\s]+/g, "_")
+    .replace(/[^a-z0-9äöüß_-]/g, "")
+    .slice(0, 24);
+}
+
+// ---------- Join ----------
+function join(name){
+  myName = name.trim();
+  myKey = sanitizeKey(myName);
+  if (!myKey) return;
+  localStorage.setItem("orakel_name", myName);
+  db.ref(`${ROOT}/players/${myKey}`).update({
+    name: myName,
+    joinedAt: firebase.database.ServerValue.TIMESTAMP
+  });
+  $("whoami").classList.remove("hidden");
+  $("myName").textContent = myName;
+  listenState();
+}
+
+$("joinBtn").onclick = async () => {
+  const raw = $("nameInput").value.trim();
+  if (!raw) return;
+  const key = sanitizeKey(raw);
+  if (!key) return;
+  // Check whether this name is already in the game
+  const snap = await db.ref(`${ROOT}/players/${key}`).once("value");
+  if (snap.exists()) {
+    pendingName = raw;
+    $("dupName").textContent = snap.val().name || raw;
+    $("dupBox").classList.remove("hidden");
+    return;
+  }
+  join(raw);
+};
+$("dupYes").onclick = () => { $("dupBox").classList.add("hidden"); join(pendingName); };
+$("dupNo").onclick = () => {
+  $("dupBox").classList.add("hidden");
+  $("nameInput").value = "";
+  $("nameInput").placeholder = "Try e.g. first name + initial";
+  $("nameInput").focus();
+};
+$("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("joinBtn").click(); });
+$("logout").onclick = () => {
+  if (myKey) db.ref(`${ROOT}/players/${myKey}`).remove();
+  localStorage.removeItem("orakel_name");
+  location.reload();
+};
+
+// ---------- Game state ----------
+let answerListener = null;
+
+function listenState(){
+  db.ref(`${ROOT}/state`).on("value", snap => {
+    state = snap.val() || { phase: "lobby", round: 0, question: "" };
+    attachAnswerListener();
+    render();
+  });
+  db.ref(`${ROOT}/players`).on("value", snap => {
+    $("playerCount").textContent = snap.numChildren();
+  });
+}
+
+function attachAnswerListener(){
+  if (answerListener) { answerListener.ref.off("value", answerListener.cb); }
+  const ref = db.ref(`${ROOT}/answers/r${state.round}/${myKey}`);
+  const cb = snap => { myAnswerThisRound = snap.val(); render(); };
+  ref.on("value", cb);
+  answerListener = { ref, cb };
+}
+
+function render(){
+  if (!myKey) return;
+  if (state.phase === "open") {
+    if (myAnswerThisRound) { show("viewDone"); return; }
+    $("roundTag1").textContent = "ROUND " + state.round;
+    $("questionText").textContent = state.question || "Question on the board";
+    show("viewVote");
+  } else if (state.phase === "revealed") {
+    renderResult();
+  } else {
+    resetForm();
+    show("viewWait");
+  }
+}
+
+// ---------- Form ----------
+function resetForm(){
+  choice = null; tips = { A:0, B:0, C:0 };
+  document.querySelectorAll(".choice").forEach(b => b.classList.remove("sel"));
+  ["A","B","C"].forEach(o => $("t"+o).textContent = "0");
+  $("tipSum").textContent = "0";
+  updateSubmit();
+}
+
+document.querySelectorAll(".choice").forEach(btn => {
+  btn.onclick = () => {
+    choice = btn.dataset.choice;
+    document.querySelectorAll(".choice").forEach(b => b.classList.remove("sel"));
+    btn.classList.add("sel");
+    updateSubmit();
+  };
+});
+
+document.querySelectorAll(".stepper button").forEach(btn => {
+  btn.onclick = () => {
+    const o = btn.dataset.t, d = parseInt(btn.dataset.d);
+    tips[o] = Math.max(0, Math.min(99, tips[o] + d));
+    $("t"+o).textContent = tips[o];
+    $("tipSum").textContent = tips.A + tips.B + tips.C;
+    updateSubmit();
+  };
+});
+
+function updateSubmit(){
+  const ok = choice && (tips.A + tips.B + tips.C) > 0;
+  $("submitBtn").disabled = !ok;
+  $("submitBtn").style.opacity = ok ? "1" : ".4";
+}
+
+$("submitBtn").onclick = () => {
+  if (!choice) return;
+  $("submitBtn").disabled = true;
+  db.ref(`${ROOT}/answers/r${state.round}/${myKey}`).set({
+    name: myName,
+    choice: choice,
+    predA: tips.A, predB: tips.B, predC: tips.C,
+    ts: firebase.database.ServerValue.TIMESTAMP
+  });
+  resetForm();
+};
+
+// ---------- Result ----------
+function renderResult(){
+  db.ref(`${ROOT}/results/r${state.round}`).once("value").then(snap => {
+    const res = snap.val();
+    if (!res) { show("viewWait"); return; }
+    $("roundTag2").textContent = "ROUND " + state.round;
+    const mine = res.perPlayer && res.perPlayer[myKey];
+    const rows = ["A","B","C"].map(o => {
+      const actual = res.counts[o] || 0;
+      const pred = mine ? mine["pred"+o] : null;
+      const devTxt = (pred === null || pred === undefined) ? "" :
+        `<span class="dev">your guess: ${pred} → ${Math.abs(pred-actual)} pt</span>`;
+      return `<div class="resrow"><span class="opt">${o}</span>
+        <span class="resnums"><b>${actual}</b> votes ${devTxt}</span></div>`;
+    }).join("");
+    $("resRows").innerHTML = rows;
+    $("myChoiceLine").innerHTML = mine
+      ? `You picked <b>${mine.choice}</b>.`
+      : "You didn't submit an answer this round.";
+    $("roundDev").textContent = mine ? mine.dev : "–";
+    db.ref(`${ROOT}/scores/${myKey}`).once("value").then(s => {
+      const sc = s.val();
+      $("totalDev").textContent = sc ? sc.total : "–";
+    });
+    show("viewResult");
+  });
+}
+
+// ---------- Auto-login ----------
+const saved = localStorage.getItem("orakel_name");
+if (saved) { join(saved); } else { show("viewJoin"); }
+</script>
+</body>
+</html>
